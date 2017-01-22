@@ -11,6 +11,7 @@ header {
 h1 {
   font-size: 60px;
   font-weight: bold;
+  font-color: #ffffff;
   font-family: Impact, Charcoal, sans-serif;
   text-align: center;
 }
@@ -20,7 +21,7 @@ body {
   margin: 0;
   font-family: Courier, 'Courier New', monospace;
   font-size: 1.6rem;
-  background: #fff;
+  background-image: url(images/373H.jpeg);
   color: #000;
 }
 
