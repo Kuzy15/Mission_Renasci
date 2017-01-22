@@ -33,7 +33,7 @@ body {
   background-image: url(images/373H.jpg); 
   background-repeat:no-repeat;
   background-position:center;
-  width: 1500px;
+  width: 1100px;
   heigth: 2700px;
   color: #000;
 }
@@ -54,4 +54,5 @@ main {
 
 footer {
   text-align: center;
+  color: white;
 }
