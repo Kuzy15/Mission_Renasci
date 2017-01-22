@@ -5,8 +5,7 @@ html {
 
 header {
   display:run-in;
-  background-color: #000;
-
+  background-color: #000000;
 }
 @import "compass/css3";
 
