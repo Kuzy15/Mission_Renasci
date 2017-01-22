@@ -151,7 +151,7 @@ var GameOver = {
     //TODO 7 declarar el callback del boton.
 
     actionOnClick: function(){
-        this.game.state.start('play');
+      this.game.state.start('play');
     },
     menuOnClick: function(){
         this.game.state.start('menu');
@@ -183,7 +183,8 @@ var BootScene = {
     this.game.load.image('buttonStart', 'images/START.png');
     this.game.load.image('buttonReset', 'images/RESET.png');
     this.game.load.image('buttonMenu', 'images/MAINMENU.png');
-    this.game.load.image('logo', 'images/FondoDef.png');
+    this.game.load.image('logo', 'images/Portada.png');
+    this.game.load.audio('mainTheme', ['audio/menuTheme.mp3', 'audiomenuTheme.ogg']);
 
   },
 
@@ -286,29 +287,38 @@ function init(){
 
 },{"./end.js":2,"./gameover_scene.js":3,"./menu_scene.js":5,"./play_scene.js":6}],5:[function(require,module,exports){
 var MenuScene = {
+    buttonStart: {},
     create: function () {
+        this.music = this.game.add.audio('mainTheme');
+        this.music.volume = 0.5;
+        this.music.loop = true;
+        this.music.play();
+
         this.game.world.setBounds(0,0,800,600);
         var logo = this.game.add.sprite(this.game.world.centerX,
                                         this.game.world.centerY,
                                         'logo');
         logo.anchor.setTo(0.5, 0.5);
-        var buttonStart = this.game.add.button(this.game.world.centerX,
-                                               this.game.world.centerY+50,
+        this.buttonStart = this.game.add.button(this.game.world.centerX-10,
+                                               this.game.world.centerY+160,
                                                'buttonStart',
                                                this.actionOnClick,
                                                this, 2, 1, 0);
-        buttonStart.anchor.set(0.5);
-        buttonStart.alpha = 0.90;
-        //buttonStart.scale.setTo(0.25, 0.25);
+        this.buttonStart.anchor.set(0.5);
+        this.buttonStart.alpha = 0.90;
+        this.buttonStart.scale.setTo(0.65, 0.65);
         //var style = { font: "40px Arial", fill: "#000000", align: "center"};
         //var textStart = this.game.add.text(0, 0, "Start", style);
         //textStart.font = 'Sniglet';
         //textStart.anchor.set(0.5);
         //buttonStart.addChild(textStart);
     },
-
+    update: function() {
+      this.buttonStart.rotation += 0.01;
+    },
     actionOnClick: function(){
-        this.game.state.start('preloader');
+      this.music.destroy();
+      this.game.state.start('preloader');
     }
 };
 
@@ -328,21 +338,21 @@ var Direction = {'LEFT':0, 'RIGHT':1, 'NONE':3}
 
 //Scena de juego.
 var PlayScene = {
-    _rush: {}, //player
-    _speed: 300, //velocidad del player
-    _jumpSpeed: 600, //velocidad de salto
-    _jumpHight: 60, //altura máxima del salto.
-	  _jetPackPower: 700,
-	  _jetPack: 700,
-    _playerState: PlayerState.STOP, //estado del player
-    _direction: Direction.NONE,  //dirección inicial del player. NONE es ninguna dirección.
-	  _doubleJump: false,	//Booleano que nos permite ver si ya se ha realizado el doble salto.
-	  _alreadyJump: false, //Booleano que nos permite ver si ya se ha realizado el primer salto.
-	  _jetPackText: '100 %',
-	  _pause: true,
-	  _continueButton: {},
-	  _buttonMenu: {},
-    _enemies: {},//[]
+  _rush: {}, //player
+  _speed: 300, //velocidad del player
+  _jumpSpeed: 600, //velocidad de salto
+  _jumpHight: 60, //altura máxima del salto.
+	_jetPackPower: 700,
+	_jetPack: 700,
+  _playerState: PlayerState.STOP, //estado del player
+  _direction: Direction.NONE,  //dirección inicial del player. NONE es ninguna dirección.
+	_doubleJump: false,	//Booleano que nos permite ver si ya se ha realizado el doble salto.
+	_alreadyJump: false, //Booleano que nos permite ver si ya se ha realizado el primer salto.
+	_jetPackText: '100 %',
+	_pause: true,
+	_continueButton: {},
+	_buttonMenu: {},
+  _enemies: {},//[]
     //_flipped : false,
     //_pool: {},
     //_time_til_spawn: Math.random()*3000 + 2000,//Controla el tiempo de spawn
@@ -350,17 +360,17 @@ var PlayScene = {
     //_timer: null,
     //_spawn_time: Math.random() * (25000-20000) + 20000,//(15s, 10s] Este tiempo hay que hacer que dependa de la velocidad del personaje
     //o del tiempo que queda para que acabe la partida si lo hacemos contrarreloj.
-	  _pauseScreen:{}, //Sprite de Pause.
-	  _pausex: 0, //Variables que utilizamos para mover el sprite de pause con la camara.
-	  _pauseY: 0,
-	  _winTrigger: {},//Trigger que controla el win del player.
-    _rushX: null,
-    _rushY: null,
-    _stopTrigger: {},
-    _laserBarrier: {},//Sprite de barrera laser.
-    _coreItem: {},//Sprite del item que hay que recoger y que abre la puerta.
-    _life: 0,//Vida del personaje.
-    _bloodLayer: {},//Sprite que indica al jugador como va de vida.
+	_pauseScreen:{}, //Sprite de Pause.
+	_pausex: 0, //Variables que utilizamos para mover el sprite de pause con la camara.
+	_pauseY: 0,
+	_winTrigger: {},//Trigger que controla el win del player.
+  _rushX: null,
+  _rushY: null,
+  _stopTrigger: {},
+  _laserBarrier: {},//Sprite de barrera laser.
+  _coreItem: {},//Sprite del item que hay que recoger y que abre la puerta.
+  _life: 0,//Vida del personaje.
+  _bloodLayer: {},//Sprite que indica al jugador como va de vida.
 	_mainTheme: {},
 	_propulsionSound: {},
 	_easyModeButton: {},
@@ -569,6 +579,9 @@ var PlayScene = {
         if(this.isJumping()){
           this._playerState = PlayerState.JUMP;
 					//this._alreadyJump = true;
+          this._propulsionSound.play();//--------------------------------------------------------------------------->
+          this._propulsionSound.loop = true;
+          this._propulsionSound.volume = 2;
           this._initialJumpHeight = this._rush.y;
           this._rush.animations.play('jump');
         }else{
@@ -606,7 +619,8 @@ var PlayScene = {
             //this._doubleJump = false;
   				  this._jetPack = this._jetPackPower;
 				  this._alreadyJump = false;
-				  this._propulsionSound.mute = true;
+				  //this._propulsionSound.mute = true;
+          this._propulsionSound.pause();//------------------------------------------------------------>
             if(movement !== Direction.NONE){
               this._playerState = PlayerState.RUN;
               this._rush.animations.play('run');
@@ -684,21 +698,21 @@ var PlayScene = {
   },
 
   onPlayerDie: function(){
-      //TODO 6 Carga de 'gameOver';
-      this.game.state.start('gameOver');
+    this.game.state.start('gameOver');
 	  this._mainTheme.stop();
 	  this._zombiesSound.stop();
 	  this._propulsionSound.stop();
-		
+    this._bloodLayer.alpha = 0;
+
 
   },
 
   onPlayerWin: function(){
     this.game.state.start('end');
-	this._mainTheme.stop();
-	this._zombiesSound.stop();
-	this._propulsionSound.stop();
-		
+	  this._mainTheme.stop();
+	  this._zombiesSound.stop();
+	  this._propulsionSound.stop();
+
   },
 
   checkPlayerFell: function(){
@@ -742,7 +756,7 @@ var PlayScene = {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.stage.backgroundColor = '#a9f0ff';
     this.game.physics.arcade.enable(this._rush);
-	 this.game.physics.arcade.enable(this._winTrigger);
+	  this.game.physics.arcade.enable(this._winTrigger);
     this._rush.anchor.setTo(0.5, 0.5);
     this._rush.body.bounce.y = 0.2;
     this._rush.body.gravity.y = 20000;
@@ -764,12 +778,14 @@ var PlayScene = {
   destroyResources: function(){
     this.tilemap.destroy();
     this.tiles.destroy();
-	this.tilesFiccion.destroy();
-	this.tilesPared.destroy();
-	this._mainTheme.destroy();
-	this.game.cache.removeSound('backgroundTheme');
-	this._propulsionSound.destroy();
-	this.game.cache.removeSound('propulsion');
+	  this.tilesFiccion.destroy();
+	  this.tilesPared.destroy();
+	  this._mainTheme.destroy();
+	  this.game.cache.removeSound('backgroundTheme');
+	  this._propulsionSound.destroy();
+	  this.game.cache.removeSound('propulsion');
+    this._zombiesSound.destroy();
+    this.game.cache.removeSound('zombies');
     this.game.world.setBounds(0,0,800,600);
   },
 
@@ -792,6 +808,8 @@ var PlayScene = {
 			if (this._pause === false){
 				this._pause = true;
 				this._mainTheme.mute = true;
+        this._zombiesSound.mute = true;
+        this._propulsionSound.pause();
 				this._rush.body.bounce.y = 0;
 				this._rush.body.allowGravity = false;
 				this._rush.body.velocity.y = 0;
@@ -833,6 +851,8 @@ var PlayScene = {
 		//Mostramos los botones y reseteamos el juego.
 		this._pause = false;
 		this._mainTheme.mute = false;
+    this._zombiesSound.mute =false;
+    this._propulsionSound.resume();
 
 		this._continueButton.visible = false;
 		this._buttonMenu.visible = false;
@@ -849,6 +869,8 @@ var PlayScene = {
 
 	exitOnClick: function (){
     this._pause = false;
+    this._zombiesSound.destroy();
+    this._mainTheme.destroy();
 		this.game.state.start('menu');
 
 	},
@@ -858,13 +880,13 @@ var PlayScene = {
     if (this.game.input.keyboard.isDown(Phaser.Keyboard.UP) && /*!this._doubleJump*/ this._jetPack >= 15 && this._alreadyJump){
       this._initialJumpHeight = this._rush.y;
 
-			this._propulsionSound.mute = false;
+			//this._propulsionSound.mute = false;------------------------------------------------------------------------------------------->
 			this._jetPack -= 5;
 			return true;
 		}
-		
+
     return false;
-	
+
 	},
 
   //CODIGO DE ENEMIGOS
@@ -929,9 +951,11 @@ var PlayScene = {
 
 	  //this._mainTheme.play();
 	  this._mainTheme.loop = true;
-	  this._propulsionSound.loop = true;
+    this._mainTheme.volume = 0.2;
+	  //this._propulsionSound.loop = true;----------------------------------------------------------------------------------->
+    //this._propulsionSound.volume = 1.2;
 	  this._zombiesSound.loop = true;
-	  this._zombiesSound.volume = 0.2;
+	  this._zombiesSound.volume = 0.1;
 
 
   },
@@ -941,8 +965,8 @@ var PlayScene = {
 	  this._life = 100;
 	  this._pause = false;
 	  this._mainTheme.play();
-	  this._propulsionSound.play();
-	  this._propulsionSound.mute = true;
+	  //this._propulsionSound.play();------------------------------------------------------------------>
+	  //this._propulsionSound.mute = true;
 	  this._zombiesSound.play();
 
 	  this._easyModeButton.destroy();
@@ -954,11 +978,11 @@ var PlayScene = {
   hardModeAction: function(){
 
 	  this._life = 10;
-	  this._bloodLayer.destroy();
+	  //this._bloodLayer.destroy();-------------------------------------------------------------------->
 	  this._pause = false;
 	  this._mainTheme.play();
-	  this._propulsionSound.play();
-	  this._propulsionSound.mute = true;
+	  //this._propulsionSound.play();------------------------------------------------------------------------------------>
+	  //this._propulsionSound.mute = true;
 	  this._zombiesSound.play();
 
 	  this._easyModeButton.destroy();
