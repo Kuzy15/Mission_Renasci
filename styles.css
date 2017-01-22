@@ -17,8 +17,10 @@ h1 {
   text-align: center;
   text-shadow: 3px 3px 5px black;
   position: relative;
-  -webkit-animation: mymove 5s infinite; /* Safari 4.0 - 8.0 */
-  animation: mymove 5s infinite;
+  -webkit-animation-name: mymove; /* Safari 4.0 - 8.0 */
+  -webkit-animation-duration: 5s; /* Safari 4.0 - 8.0 */
+  animation-name: mymove;
+  animation-duration: 5s;
 }
 
 @-webkit-keyframes mymove {
