@@ -31,10 +31,12 @@ body {
   font-family: Courier, 'Courier New', monospace;
   font-size: 1.6rem;
   background-image: url(images/373H.jpg); 
-  background-repeat:no-repeat;
-  background-position:center;
-  width: 1500px;
-  heigth: 2700px;
+  background-repeat: no-repeat;        
+  position: relative;        
+  width: 85%;            
+  height: 610px;       
+  margin-left: auto;      
+  margin-right: auto;
   color: #000;
 }
 
