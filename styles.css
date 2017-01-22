@@ -17,6 +17,14 @@ h1 {
   text-align: center;
 }
 
+h2 {
+  font-weight: bold;
+  color: white;
+  font-family: Impact, Charcoal, sans-serif;
+  text-align: center;
+
+}
+
 body {
   padding: 0;
   margin: 0;
