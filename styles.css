@@ -4,14 +4,15 @@ html {
 }
 
 header {
+  display:run-in;
   background-color: #808080;
-  height: 100px;
+
 }
 
 h1 {
   font-size: 60px;
   font-weight: bold;
-  font-color: #ffffff;
+  color: white;
   font-family: Impact, Charcoal, sans-serif;
   text-align: center;
 }
