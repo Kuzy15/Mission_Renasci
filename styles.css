@@ -24,7 +24,7 @@ body {
   font-size: 1.6rem;
   background-image: url(images/373H.jpg);
   background-size: contain;                      
-  background-repeat: no-repeat;
+  background-repeat: repeat;
   background-position: center;
   width: 1500px;
   height: 100%;
