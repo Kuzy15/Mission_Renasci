@@ -3,6 +3,11 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 header {
   display:run-in;
   background-color: #808080;
