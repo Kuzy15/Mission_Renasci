@@ -3,11 +3,6 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
-}
-
 header {
   display:run-in;
   background-color: #808080;
@@ -28,6 +23,9 @@ body {
   font-family: Courier, 'Courier New', monospace;
   font-size: 1.6rem;
   background-image: url(images/373H.jpg);
+  background-size:     cover;                      
+  background-repeat:   no-repeat;
+  background-position: center center; 
   color: #000;
 }
 
