@@ -23,9 +23,10 @@ body {
   font-family: Courier, 'Courier New', monospace;
   font-size: 1.6rem;
   background-image: url(images/373H.jpg);
-  background-size:     cover;                      
-  background-repeat:   no-repeat;
-  background-position: center center; 
+  background-size: contain;                      
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 1500px;
   color: #000;
 }
 
@@ -40,6 +41,7 @@ main {
 
 #game {
   border: 1px solid #333;
+  position : fixed;
 }
 
 footer {
