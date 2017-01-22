@@ -23,10 +23,12 @@ body {
   font-family: Courier, 'Courier New', monospace;
   font-size: 1.6rem;
   background-image: url(images/373H.jpg); 
-  background-size: contain;                      
-  background-repeat: no-repeat;
-  background-position: center;
-  heigth: 100%;
+  background-repeat:no-repeat;
+  -webkit-background-size:cover;
+  -moz-background-size:cover;
+  -o-background-size:cover;
+  background-size:cover;
+  background-position:center;
   color: #000;
 }
 
