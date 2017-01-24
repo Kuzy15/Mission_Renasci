@@ -1,30 +1,31 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-
-
-
-
-
- function Enemy (game, image, frame, x, y) {
-  Phaser.Sprite.call(this, game, x, y, image, frame);
-  game.physics.arcade.enable(this);
+ function Enemy (thiis, image, frame, x, y) {
+  Phaser.Sprite.call(this, thiis, x, y, image, frame);
+  thiis.physics.arcade.enable(this);
   this.body.enable = true;
   this.body.gravity.y = 2000;
   this.body.gravity.x = 0;
   this.body.collideWorldBounds = true;
-  this.body.bounce.x = 0.1;
+  this.body.bounce.x = 0.5;
   this.anchor.setTo(0.5, 0.5);
   //this.scale.setTo(0.85,0.85);
-  var run = this.animations.add('run', [6, 7, 8], 10, false);
-  var runLeft = this.animations.add('runLeft', [3, 4, 5], 10, false);
-  var iddle = this.animations.add('iddle', [4, 7], 1, true);
+
 
 }
 Enemy.prototype = Object.create(Phaser.Sprite.prototype);
 Enemy.constructor = Enemy;
 
-Enemy.prototype.update = function (rushX, rushY, stopTrigger){
+
+function Zombie (thiis, image, frame, x, y) {
+  Enemy.call(this, thiis, image, frame, x, y);
+  this.SetAnimations();
+}
+Zombie.prototype = Object.create(Enemy.prototype);
+Zombie.prototype.constructor = Zombie;
+
+Zombie.prototype.update = function (rushX, rushY){
 
   // SEGUIR AL JUGADOR SI ESTAN EN SU RANGO (OFFSET--> RUSH.X y RUSH.Y)
 
@@ -51,32 +52,152 @@ Enemy.prototype.update = function (rushX, rushY, stopTrigger){
 }
 else if (this.x === rushX) this.body.velocity.x = 0;
 
-this.SetAnimations();
+this.ChangeAnimations();
 
 }﻿
 
-Enemy.prototype.SetAnimations = function(){
+Zombie.prototype.ChangeAnimations = function(){
   if(this.body.velocity.x < 0)  this.animations.play('runLeft');
   else if (this.body.velocity.x > 0)  this.animations.play('run');
   else this.animations.play('iddle');
+
+
+}
+Zombie.prototype.SetAnimations = function(){
+  var run = this.animations.add('run', [6, 7, 8], 10, false);
+  var runLeft = this.animations.add('runLeft', [3, 4, 5], 10, false);
+  var iddle = this.animations.add('iddle', [4, 7], 1, true);
+
 }
 
-module.exports = Enemy;
+
+function Boss(thiis, image, frame, x, y){
+  Enemy.call(this, thiis, image, frame, x, y);
+  this._last_shoot = 0;
+  this.setAnimatioons();
+}
+
+Boss.prototype = Object.create(Enemy.prototype);
+Boss.prototype.constructor = Boss;
+
+Boss.prototype.setAnimatioons = function () {
+
+  var p = this.animations.add('run', Phaser.Animation.generateFrameNames('right', 1, 7, '', 0), 10, false);
+  var u = this.animations.add('runLeft', Phaser.Animation.generateFrameNames('left', 1, 7, '', 0), 10, false);
+  var t = this.animations.add('atkdch', Phaser.Animation.generateFrameNames('atkdch', 0, 6, '', 0), 30,false);
+  var a =this.animations.add('atkizq', Phaser.Animation.generateFrameNames('atkizq', 0, 6, '', 0), 30,false);
+
+}
+Boss.prototype.ChangeAnimations = function(){
+  if(this.body.velocity.x < 0)  this.animations.play('runLeft');
+  else if (this.body.velocity.x > 0)  this.animations.play('run');
+}
+
+Boss.prototype.move = function (rushX, rushY) {
+  var limIZQ = 400;
+  var limDCH = 1100;
+  var offsetX = 200;
+  var offsetY = 100;
+
+  if(this.body.velocity.x === 0){
+    this.body.velocity.x = -300;
+  }
+
+  if((this.x + offsetX >= rushX && this.x < rushX) ){
+
+    if((this.y - offsetY <= rushY && this.y >= rushY) || (this.y + offsetY >= rushY && this.y <= rushY)){
+      this.body.velocity.x = 250;
+      //this.animations.play('run');
+      //animaciones DCH
+    }
+  }
+  else if((this.x - offsetX <= rushX && this.x > rushX)){
+
+    if((this.y - offsetY <= rushY && this.y >= rushY) || (this.y + offsetY >= rushY && this.y <= rushY)){
+      this.body.velocity.x = -250;
+      //this.animations.play('runLeft');
+      //animciones IZQ
+    }
+ }  /*NO SE SI HABRIA QUE QUITARLO PARA CUANDO DISPARE ESTE QUIETO Y HAGA LA ANIMACION DE ATAQUE */
+
+
+
+ else if(this.body.x >= limDCH ){
+     this.body.velocity.x = -300;
+     //animaciones DCH
+    //this.animations.play('run');
+
+   }
+  else if (this.body.x <= limIZQ){
+    this.body.velocity.x = 300;
+      //animaciones IZQ
+    //this.animations.play('runLeft');
+
+  }
+  this.ChangeAnimations();
+}
+
+Boss.prototype.attack = function (rushX, rushY, rocks, thiis) {
+
+  var rock = rocks.getFirstDead();
+  var timeTilShoot = 10000;
+
+  var currentTime = thiis.time.now;
+  var offsetX = 400;
+  //console.log(currentTime);
+  if(rock){
+  if(currentTime - this._last_shoot > timeTilShoot){
+    this.body.velocity.x = 0;
+    if(this.x < rushX/*this.x + offsetX >= rushX && this.x < rushX*/){
+      //dispara hacia la derecha
+      //this.body.velocity.x = 0;
+      //this.y -= 30;
+      this.animations.play('atkdch');
+      this._last_shoot = thiis.time.now;
+
+      rock.scale.setTo(0.5, 0.5);
+      rock.reset(this.x + 35, this.y);
+      rock.body.velocity.x = 550;
+
+    }
+
+
+    else if(this. x > rushX/*this.x - offsetX <= rushX && this.x > rushX*/){
+      //disparahacia la izquierda
+      //this.body.velocity.x = 0;
+      //this.y -= 30;
+      this.animations.play('atkizq');
+      this._last_shoot = thiis.time.now;
+      rock.scale.setTo(0.5, 0.5);
+      rock.reset(this.x - 35, this.y+10);
+      rock.body.velocity.x = -550;
+    }
+  }
+}
+}
+
+module.exports = {
+  Zombie: Zombie,
+  Boss: Boss
+};
 
 },{}],2:[function(require,module,exports){
 var end = {
     create: function () {
-        console.log("You win!");
-        this.game.world.setBounds(0,0,800,600);
-        var wallpaper2 = this.game.add.sprite(this.game.world.centerX,
+      this.music = this.game.add.audio('win');
+      this.music.volume = 0.5;
+      this.music.loop = true;
+      this.music.play();
+      this.game.world.setBounds(0,0,800,600);
+      var wallpaper2 = this.game.add.sprite(this.game.world.centerX,
                                         this.game.world.centerY,
                                         'wallpaper2');
-        wallpaper2.anchor.setTo(0.5, 0.5);
-        var button = this.game.add.button(600, 300,
+      wallpaper2.anchor.setTo(0.5, 0.5);
+      var button = this.game.add.button(600, 300,
                                           'buttonReset',
                                           this.actionOnClick,
                                           this, 2, 1, 0);
-        button.anchor.set(0.5);
+      button.anchor.set(0.5);
         //var goText = this.game.add.text(400, 100, "You win!");
         //var text = this.game.add.text(0, 0, "Reset Game");
         //text.anchor.set(0.5);
@@ -84,11 +205,11 @@ var end = {
         //button.addChild(text);
 
 
-        var buttonMenu = this.game.add.button(250, 300,
+      var buttonMenu = this.game.add.button(250, 300,
                                           'buttonMenu',
                                           this.menuOnClick,
                                           this, 2, 2, 4);
-        buttonMenu.anchor.set(0.5);
+      buttonMenu.anchor.set(0.5);
         //var textMenu = this.game.add.text(0, 0, "Return Main Menu");
         //textMenu.anchor.set(0.5);
         //buttonMenu.addChild(textMenu);
@@ -98,10 +219,12 @@ var end = {
 
 
     actionOnClick: function(){
-        this.game.state.start('play');
+      this.music.destroy();
+      this.game.state.start('play');
     },
     menuOnClick: function(){
-        this.game.state.start('menu');
+      this.music.destroy();
+      this.game.state.start('menu');
     }
 
 };
@@ -113,7 +236,11 @@ module.exports = end;
 },{}],3:[function(require,module,exports){
 var GameOver = {
     create: function () {
-        console.log("Game Over");
+
+        this.music = this.game.add.audio('win');
+        this.music.volume = 0.5;
+        this.music.loop = true;
+        this.music.play();
         this.game.world.setBounds(0,0,800,600);
         var wallpaper = this.game.add.sprite(this.game.world.centerX,
                                         this.game.world.centerY,
@@ -151,10 +278,12 @@ var GameOver = {
     //TODO 7 declarar el callback del boton.
 
     actionOnClick: function(){
+      this.music.destroy();
       this.game.state.start('play');
     },
     menuOnClick: function(){
-        this.game.state.start('menu');
+      this.music.destroy();
+      this.game.state.start('menu');
     }
 
 };
@@ -220,12 +349,20 @@ var PreloaderScene = {
 	  this.game.load.image('laserBarrier','images/laser.png');
 	  this.game.load.image('coreItem', 'images/core.png');
 	  this.game.load.image('bloodLayer', 'images/sangre.png');
-	  this.game.load.image('bloodButton', 'images/botonSangre.png')
+    this.game.load.image('rock', 'images/rocks.png'),
+
 	  this.game.load.audio('backgroundTheme', ['audio/BackgroundTheme.mp3', 'audio/BackgroundTheme.ogg']);
 	  this.game.load.audio('propulsion', ['audio/enginehum3.ogg', 'audio/enginehum.mp3']);
 	  this.game.load.audio('zombies', 'audio/zombies.ogg');
+    this.game.load.audio('win', ['audio/Epic.ogg', 'audio/Epic.mp3']);
 
     this.game.load.spritesheet('zombie', 'images/ZombieSheet.png', 64, 64, 12);
+    this.game.load.atlas('boss', 'images/bossfinal.png', 'images/bossfinal2.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+    /*this.game.load.spritesheet('bossfinal', 'images/bossfinal.png', 77, 64, 70);
+    this.game.load.spritesheet('bossWalk', 'images/golem-walk.png', 64, 64, 28);
+    this.game.load.spritesheet('bossDie', 'images/golem-die.png', 64, 64, 14);*/
+
+
     this.load.onLoadComplete.add(this.loadComplete,this);
 
 
@@ -327,8 +464,9 @@ module.exports = MenuScene;
 },{}],6:[function(require,module,exports){
 'use strict';
 
-//var Pool = require('./Pool');
-var Enemy = require('./Enemy');
+
+var enemies = require('./Enemy.js');
+
 //Enumerados: PlayerState son los estado por los que pasa el player. Directions son las direcciones a las que se puede
 //mover el player.
 var PlayerState = {'JUMP':0, 'RUN':1, 'FALLING':2, 'STOP':3}
@@ -338,6 +476,7 @@ var Direction = {'LEFT':0, 'RIGHT':1, 'NONE':3}
 
 //Scena de juego.
 var PlayScene = {
+  _boss: {},
   _rush: {}, //player
   _speed: 300, //velocidad del player
   _jumpSpeed: 600, //velocidad de salto
@@ -352,14 +491,12 @@ var PlayScene = {
 	_pause: true,
 	_continueButton: {},
 	_buttonMenu: {},
-  _enemies: {},//[]
-    //_flipped : false,
-    //_pool: {},
-    //_time_til_spawn: Math.random()*3000 + 2000,//Controla el tiempo de spawn
-    //_last_spawn_time: 1000,
-    //_timer: null,
-    //_spawn_time: Math.random() * (25000-20000) + 20000,//(15s, 10s] Este tiempo hay que hacer que dependa de la velocidad del personaje
-    //o del tiempo que queda para que acabe la partida si lo hacemos contrarreloj.
+  _enemies: {},
+  //_time_til_spawn: Math.random()*3000 + 2000,//Controla el tiempo de spawn
+  _last_spawn_time: 1000,
+  _timer: null,
+  _spawn_time: Math.random() * (25000-20000) + 20000,//(15s, 10s]
+
 	_pauseScreen:{}, //Sprite de Pause.
 	_pausex: 0, //Variables que utilizamos para mover el sprite de pause con la camara.
 	_pauseY: 0,
@@ -369,13 +506,13 @@ var PlayScene = {
   _stopTrigger: {},
   _laserBarrier: {},//Sprite de barrera laser.
   _coreItem: {},//Sprite del item que hay que recoger y que abre la puerta.
-  _life: 0,//Vida del personaje.
+  _life: 100,//Vida del personaje.
   _bloodLayer: {},//Sprite que indica al jugador como va de vida.
 	_mainTheme: {},
 	_propulsionSound: {},
-	_easyModeButton: {},
-	_hardModeButton: {},
 	_zombiesSound: {},
+  _bossGroup: {},
+  _rocks: {},
 
 //--------------------------------------------------------------------------------
 
@@ -385,7 +522,7 @@ var PlayScene = {
     //------------------------------------------------
     //-----------TIMER--------------------------------
     //this._timer = this.game.time.create(false);
-    //this._timer.loop(this._spawn_time, this.spawnEnemies, this);
+    //this._timer.loop(this._spawn_time, this.bossAttack, this);
     //this._timer.start();
     //------------------------------------------------
 
@@ -403,7 +540,7 @@ var PlayScene = {
     this._bloodLayer.scale.setTo(0.3,0.3);
 	  this._bloodLayer.alpha = 0;
 	  //Añadimos al jugador.
-    this._rush = this.game.add.sprite(70, 3350, 'rush', 1);
+    this._rush = this.game.add.sprite(800, 1507, 'rush', 1);
     this._rush.scale.setTo(0.5, 0.5);
 	  //Añadimos el sprite de pause.
     this._pauseScreen = this.add.sprite(70,3350,'pauseScreen');
@@ -419,6 +556,18 @@ var PlayScene = {
 	  this._coreItem.scale.setTo(0.6,0.6);
 	  this.game.physics.arcade.enable(this._coreItem);
 	  this._coreItem.body.immovable = true;
+
+
+    //Rocas que lanza el enemigo
+    this._rocks = this.game.add.group();
+    this._rocks.enableBody = true;
+    this._rocks.physicsBodyType = Phaser.Physics.ARCADE;
+    this._rocks.createMultiple(1, 'rock');
+    this._rocks.setAll('outOfBoundsKill', true);
+    this._rocks.setAll('checkWorldBounds', true);
+    this._rocks.setAll('anchor.x', 0.5);
+    this._rocks.setAll('anchor.y', 0.5);
+
     //"Triggers" para detener a los zombies en ciertos puntos del mapa
     this._stopTrigger = this.game.add.group();
     this._stopTrigger = this.game.add.physicsGroup();
@@ -471,10 +620,15 @@ var PlayScene = {
 
 //CODIGO DE ENEMIGOS  ----------------------------------------------------------------------
     this._enemies = this.game.add.group();
+    this._bossGroup = this.game.add.group();
 
     //this._enemies = this.game.add.physicsGroup(Phaser.Physics.ARCADE);
     //this._enemies.setAll('body.collideWorldBounds', true);
     //this.spawnEnemies(890, 3350);
+    this._boss = new enemies.Boss(this.game, 'boss', 0, 900, 1547);
+    this._bossGroup.add(this._boss);
+
+    //console.log("hooooooooooooooooooooooooola", this._boss.y);
     this.spawnEnemies(1247, 3350);
     //this.spawnEnemies(1700, 3350);
     this.spawnEnemies(1274, 2803);
@@ -496,6 +650,7 @@ var PlayScene = {
     this.spawnEnemies(1555, 1507);
     this.spawnEnemies(1700, 1507);
     this.spawnEnemies(900, 1699);
+
 	  //Barrera laser
 	  this._laserBarrier = this.add.sprite(1376,1932, 'laserBarrier');
 	  this._laserBarrier.scale.setTo(1.6,1);
@@ -534,38 +689,18 @@ var PlayScene = {
 	  this._bloodLayer = this.add.sprite(70,3350,'bloodLayer');
     this._bloodLayer.scale.setTo(0.3,0.3);
 	  this._bloodLayer.alpha = 0;
-	  //Botones de dificultad
-    this._easyModeButton = this.game.add.button(200, 3400,
-							  'bloodButton',
-							  this.easyModeAction,
-							  this, 2, 1, 0);
-    this._easyModeButton.anchor.set(0.5);
-
-	  var text = this.game.add.text(0, 0, "Easy");
-	  text.anchor.set(0.5);
-
-	this._easyModeButton.addChild(text);
-	this._easyModeButton.scale.setTo(0.8,0.8);
-    this._hardModeButton = this.game.add.button(550, 3400,
-							  'bloodButton',
-							  this.hardModeAction,
-							  this, 2, 1, 0);
-    this._hardModeButton.anchor.set(0.5);
-
-	  var text = this.game.add.text(0, 0, "Hard");
-	  text.anchor.set(0.5);
-
-	  this._hardModeButton.addChild(text);
-	  this._hardModeButton.scale.setTo(0.8,0.8);
 	  this.configure();
   },
 
     //IS called one per frame.
   update: function () {
-    //Chekeamos la pausa en el update.
+    //Chekseamos la pausa en el update.
 	  this.checkPause();
+     //console.log(this._rush.x, this._rush.y);
 	  //Comprobamos las colisiones.
+
 	  this.game.physics.arcade.collide(this._enemies, this.groundLayer);
+    this.game.physics.arcade.collide(this._bossGroup, this.groundLayer);
 	  this.game.physics.arcade.collide(this._rush, this._laserBarrier);
 	  this.game.physics.arcade.collide(this._rush, this.groundLayer);
 		//Si la variable de pause está a false, si hay que comprobar el bucle del juego.
@@ -581,7 +716,6 @@ var PlayScene = {
 					//this._alreadyJump = true;
           this._propulsionSound.play();//--------------------------------------------------------------------------->
           this._propulsionSound.loop = true;
-          this._propulsionSound.volume = 2;
           this._initialJumpHeight = this._rush.y;
           this._rush.animations.play('jump');
         }else{
@@ -691,9 +825,26 @@ var PlayScene = {
 
         this._enemies.forEach(function (zombie){
           if(!this.game.physics.arcade.collide(zombie, this._stopTrigger)){
-            zombie.update(/*this.game,*/ this._rushX, this._rushY, this._stopTrigger);
+            zombie.update(/*this.game,*/ this._rushX, this._rushY);
+
           }
         },this);
+
+        this._bossGroup.forEach(function(boss){
+          boss.move(this._rushX, this._rushY);
+        },this);
+
+        this._bossGroup.forEach(function(boss){//el jefe esta puesto como un grupo porque al ponerlo como un objeto unico
+          //no se pintaba sin embargo si estaba presente en el juego
+          boss.attack(this._rushX, this._rushY, this._rocks, this.game);
+
+        },this);
+
+        this.game.physics.arcade.overlap(this._rocks, this._rush, this.rockCollision, null, this);
+
+
+
+
 		}
   },
 
@@ -704,6 +855,12 @@ var PlayScene = {
 	  this._propulsionSound.stop();
     this._bloodLayer.alpha = 0;
 
+
+  },
+
+  rockCollision: function (rock, rush) {
+    rock.kill();
+    this.onPlayerDie();
 
   },
 
@@ -764,6 +921,9 @@ var PlayScene = {
     this._rush.body.velocity.x = 0;
     this.game.camera.follow(this._rush);
     this.game.camera.setSize(700,500)
+    this._pause = false;
+    //this._mainTheme.play();
+    //this._zombiesSound.play();
 
   },
   //move the player
@@ -862,6 +1022,7 @@ var PlayScene = {
 		this._rush.body.allowGravity = true;
 		this._rush.body.gravity.y = 20000;
     //-----------------TIMER--------------------------------
+    //
     //this._timer.resume();
     //------------------------------------------------------
 
@@ -892,7 +1053,12 @@ var PlayScene = {
   //CODIGO DE ENEMIGOS
   onCollisionEnemy: function() {
 
-    if(this.game.physics.arcade.collide(this._rush, this._enemies)){
+    /*if(this.game.physics.arcade.collide(this._rush, this._rocks)){
+
+      this.onPlayerDie();
+    }*/
+
+    if(this.game.physics.arcade.collide(this._rush, this._enemies) || this.game.physics.arcade.collide(this._rush, this._bossGroup)){
 
       if(this._life > 1) { this._life -= 2; }
       else this.onPlayerDie();
@@ -904,7 +1070,12 @@ var PlayScene = {
   },
 
   stopEnemies: function() {
-
+    this._enemies.forEach(function (boss){
+      boss.body.velocity.x = 0;
+      boss.body.velocity.y = 0;
+    })
+    /*this._boss.body.velocity.x = 0;
+    this._boss.body.velocity.y = 0;*/
 	  this._enemies.forEach(function (zombie){
             zombie.body.velocity.x = 0;
 			zombie.body.velocity.y = 0;
@@ -939,7 +1110,7 @@ var PlayScene = {
         this._last_spawn_time = current_time;*/
         //var posRandX = (((Math.random() * (3 - 1) ) + 1) % 2 === 0) ? this.game.rnd.between(this._rush.x - 300, this._rush.x - 200) :
                                                                         //this.game.rnd.between(this._rush.x + 200, this._rush.x + 300);
-        var enemy = new Enemy(this.game, 'zombie', 5, x, y);
+        var enemy = new enemies.Zombie(this.game, 'zombie', 5, x, y);
         enemy.anchor.setTo(0.5, 0.5);
         enemy.scale.setTo(1, 1);
         this._enemies.add(enemy);
@@ -947,50 +1118,32 @@ var PlayScene = {
     //}
   },
 
+  /*bossTimeAttack: function(){
+
+    var current_time = this.game.time;
+    if(current_time - this._last_spawn_time > this._time_til_spawn){
+      //llamar al metodo del boss que ataca
+      this._last_spawn_time = current_time;
+
+  },*/
+
   startMusic: function(){
 
 	  //this._mainTheme.play();
 	  this._mainTheme.loop = true;
-    this._mainTheme.volume = 0.2;
+    this._mainTheme.volume = 0.3;
+    this._mainTheme.play();
+
 	  //this._propulsionSound.loop = true;----------------------------------------------------------------------------------->
     //this._propulsionSound.volume = 1.2;
 	  this._zombiesSound.loop = true;
-	  this._zombiesSound.volume = 0.1;
-
-
-  },
-
-  easyModeAction: function(){
-
-	  this._life = 100;
-	  this._pause = false;
-	  this._mainTheme.play();
-	  //this._propulsionSound.play();------------------------------------------------------------------>
-	  //this._propulsionSound.mute = true;
-	  this._zombiesSound.play();
-
-	  this._easyModeButton.destroy();
-	  this._hardModeButton.destroy();
-
+	  this._zombiesSound.volume = 0.2;
+    this._zombiesSound.play();
 
   },
 
-  hardModeAction: function(){
-
-	  this._life = 10;
-	  //this._bloodLayer.destroy();-------------------------------------------------------------------->
-	  this._pause = false;
-	  this._mainTheme.play();
-	  //this._propulsionSound.play();------------------------------------------------------------------------------------>
-	  //this._propulsionSound.mute = true;
-	  this._zombiesSound.play();
-
-	  this._easyModeButton.destroy();
-	  this._hardModeButton.destroy();
-
-  }
 };
 
 module.exports = PlayScene;
 
-},{"./Enemy":1}]},{},[4]);
+},{"./Enemy.js":1}]},{},[4]);
