@@ -85,8 +85,8 @@ Boss.prototype.setAnimatioons = function () {
 
   var p = this.animations.add('run', Phaser.Animation.generateFrameNames('right', 1, 7, '', 0), 10, false);
   var u = this.animations.add('runLeft', Phaser.Animation.generateFrameNames('left', 1, 7, '', 0), 10, false);
-  var t = this.animations.add('atkdch', Phaser.Animation.generateFrameNames('atkdch', 0, 6, '', 0), 30,false);
-  var a =this.animations.add('atkizq', Phaser.Animation.generateFrameNames('atkizq', 0, 6, '', 0), 30,false);
+  var t = this.animations.add('atkdch', Phaser.Animation.generateFrameNames('atkdch', 0, 6, '', 0), 5,false);
+  var a =this.animations.add('atkizq', Phaser.Animation.generateFrameNames('atkizq', 0, 6, '', 0), 5,false);
 
 }
 Boss.prototype.ChangeAnimations = function(){
@@ -104,7 +104,7 @@ Boss.prototype.move = function (rushX, rushY) {
     this.body.velocity.x = -300;
   }
 
-  if((this.x + offsetX >= rushX && this.x < rushX) ){
+  /*if((this.x + offsetX >= rushX && this.x < rushX) ){
 
     if((this.y - offsetY <= rushY && this.y >= rushY) || (this.y + offsetY >= rushY && this.y <= rushY)){
       this.body.velocity.x = 250;
@@ -119,7 +119,7 @@ Boss.prototype.move = function (rushX, rushY) {
       //this.animations.play('runLeft');
       //animciones IZQ
     }
- }  /*NO SE SI HABRIA QUE QUITARLO PARA CUANDO DISPARE ESTE QUIETO Y HAGA LA ANIMACION DE ATAQUE */
+ } /* /*NO SE SI HABRIA QUE QUITARLO PARA CUANDO DISPARE ESTE QUIETO Y HAGA LA ANIMACION DE ATAQUE */
 
 
 
@@ -141,7 +141,7 @@ Boss.prototype.move = function (rushX, rushY) {
 Boss.prototype.attack = function (rushX, rushY, rocks, thiis) {
 
   var rock = rocks.getFirstDead();
-  var timeTilShoot = 10000;
+  var timeTilShoot = 8000;
 
   var currentTime = thiis.time.now;
   var offsetX = 400;
@@ -156,7 +156,7 @@ Boss.prototype.attack = function (rushX, rushY, rocks, thiis) {
       this.animations.play('atkdch');
       this._last_shoot = thiis.time.now;
 
-      rock.scale.setTo(0.5, 0.5);
+      rock.scale.setTo(1, 1);
       rock.reset(this.x + 35, this.y);
       rock.body.velocity.x = 550;
 
@@ -169,7 +169,7 @@ Boss.prototype.attack = function (rushX, rushY, rocks, thiis) {
       //this.y -= 30;
       this.animations.play('atkizq');
       this._last_shoot = thiis.time.now;
-      rock.scale.setTo(0.5, 0.5);
+      rock.scale.setTo(1, 1);
       rock.reset(this.x - 35, this.y+10);
       rock.body.velocity.x = -550;
     }
@@ -350,7 +350,7 @@ var PreloaderScene = {
 	  this.game.load.image('laserBarrier','images/laser.png');
 	  this.game.load.image('coreItem', 'images/core.png');
 	  this.game.load.image('bloodLayer', 'images/sangre.png');
-    this.game.load.image('rock', 'images/rocks.png'),
+    this.game.load.image('rock', 'images/Rocks.png'),
 
 	  this.game.load.audio('backgroundTheme', ['audio/BackgroundTheme.mp3', 'audio/BackgroundTheme.ogg']);
 	  this.game.load.audio('propulsion', ['audio/enginehum3.ogg', 'audio/enginehum.mp3']);
@@ -544,7 +544,7 @@ var PlayScene = {
     this._bloodLayer.scale.setTo(0.3,0.3);
 	  this._bloodLayer.alpha = 0;
 	  //Añadimos al jugador.
-    this._rush = this.game.add.sprite(200, 3350, 'rush', 1);
+    this._rush = this.game.add.sprite(200, 3350, 'rush', 1);//3350, 1350
     this._rush.scale.setTo(0.5, 0.5);
 	  //Añadimos el sprite de pause.
     this._pauseScreen = this.add.sprite(70,3350,'pauseScreen');
@@ -556,7 +556,7 @@ var PlayScene = {
     this._winTrigger = this.add.sprite(70, 680,'winTrigger');
     this._winTrigger.alpha = 0;
 
-    this._barrierTrigger = this.add.sprite(100, 1530,'laserBarrier');
+    this._barrierTrigger = this.add.sprite(100, 1500,'laserBarrier');
     this._barrierTrigger.scale.setTo(1.6,1)
     this._barrierTrigger.alpha = 0;
 	  //Añadimos el core item
@@ -666,7 +666,7 @@ var PlayScene = {
 	  this._laserBarrier.body.immovable = true;
 	  this._laserBarrier.body.moves = false;
     //Barrera laser del boss
-    this._laserBarrier2 = this.add.sprite(100,1220, 'laserBarrier');
+    this._laserBarrier2 = this.add.sprite(100, 1230, 'laserBarrier');
 	  this._laserBarrier2.scale.setTo(1.6,1);
 	  this.game.physics.arcade.enable(this._laserBarrier2);
 	  this._laserBarrier2.body.immovable = true;
@@ -910,7 +910,7 @@ var PlayScene = {
 
       //Barrera laser boss entrada
       this._barrierTrigger.destroy();
-      this._laserBarrier3 = this.add.sprite(100,1580, 'laserBarrier');
+      this._laserBarrier3 = this.add.sprite(100, 1583, 'laserBarrier');
   	  this._laserBarrier3.scale.setTo(1.6,1);
   	  this.game.physics.arcade.enable(this._laserBarrier3);
   	  this._laserBarrier3.body.immovable = true;
@@ -926,17 +926,17 @@ var PlayScene = {
 
   isJumping: function(){
 
-      return ( this.game.input.keyboard.downDuration(Phaser.Keyboard.UP,5));
+      return ( this.game.input.keyboard.downDuration(Phaser.Keyboard.W,5));
   },
 
   GetMovement: function(){
       var movement = Direction.NONE
       //Move Right
-      if(this.game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+      if(this.game.input.keyboard.isDown(Phaser.Keyboard.D)){
           movement = Direction.RIGHT;
       }
       //Move Left
-      if(this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+      if(this.game.input.keyboard.isDown(Phaser.Keyboard.A)){
           movement = Direction.LEFT;
       }
       return movement;
@@ -1078,7 +1078,7 @@ var PlayScene = {
 
 
 	doubleJump: function(){
-    if (this.game.input.keyboard.isDown(Phaser.Keyboard.UP) && /*!this._doubleJump*/ this._jetPack >= 15 && this._alreadyJump){
+    if (this.game.input.keyboard.isDown(Phaser.Keyboard.W) && /*!this._doubleJump*/ this._jetPack >= 15 && this._alreadyJump){
       this._initialJumpHeight = this._rush.y;
 
 			//this._propulsionSound.mute = false;------------------------------------------------------------------------------------------->
